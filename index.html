@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LAN GAMES MANAGER by Ryo</title>
+
+  <!-- ===================================================================
+    FEUILLE DE STYLE EXTERNE
+    Toute la mise en forme (couleurs, grille, cartes, modales...) est ici.
+  =================================================================== -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- =================================================================
+    ÉCRAN DE CHARGEMENT
+    Affiché pendant le téléchargement de SQLite WASM.
+    Caché automatiquement par init() dans app.js
+  ================================================================= -->
+  <div id="loading">
+    <div class="ld-logo">LAN GAMES MANAGER</div>
+    <div class="bar"><div class="bar-fill" id="loadBar"></div></div>
+    <div class="status" id="loadStatus">Initialisation...</div>
+  </div>
+
+  <!-- Ancien effet "scanlines CRT", désactivé mais gardé au cas où -->
+  <div class="scanlines"></div>
+
+  <!-- =================================================================
+    APPLICATION PRINCIPALE
+    Masquée au départ (display:none), rendue visible par init()
+  ================================================================= -->
+  <div id="app" style="display:none">
+
+    <!-- ---- EN-TÊTE : logo, canvas démo, stats, bouton musique ---- -->
+    <header class="header-banner">
+      <!-- Illustration SVG : deux PC reliés par un câble LAN -->
+      <div class="banner-lan"><svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lanGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff2d95"/><stop offset="40%" style="stop-color:#b026ff"/><stop offset="100%" style="stop-color:#0ff"/></linearGradient><filter id="neonGlow"><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#ff2d95" flood-opacity="0.35"/></filter><linearGradient id="screenGrad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgba(0,255,255,0.12)"/><stop offset="100%" style="stop-color:rgba(176,38,255,0.08)"/></linearGradient><linearGradient id="screenGrad2" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(255,45,149,0.12)"/><stop offset="100%" style="stop-color:rgba(0,255,255,0.08)"/></linearGradient><circle id="packet" r="4" fill="url(#lanGrad)" opacity="0.9"><animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.5s" repeatCount="indefinite"/></circle></defs><g fill="none" stroke="url(#lanGrad)" stroke-width="2.5" filter="url(#neonGlow)" stroke-linecap="round" stroke-linejoin="round"><rect x="30" y="20" width="170" height="110" rx="5"/><rect x="40" y="28" width="150" height="90" rx="2" fill="url(#screenGrad1)"/><line x1="50" y1="45" x2="110" y2="45" stroke-width="2" opacity="0.5"/><line x1="50" y1="55" x2="130" y2="55" stroke-width="2" opacity="0.4"/><line x1="50" y1="65" x2="100" y2="65" stroke-width="2" opacity="0.3"/><line x1="50" y1="75" x2="140" y2="75" stroke-width="2" opacity="0.5"/><line x1="50" y1="85" x2="90" y2="85" stroke-width="2" opacity="0.3"/><line x1="50" y1="95" x2="120" y2="95" stroke-width="2" opacity="0.4"/><circle cx="115" cy="125" r="2" fill="#0ff" opacity="0.8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/></circle><line x1="115" y1="130" x2="115" y2="155"/><path d="M80,155 L150,155 L155,162 L75,162 Z"/><rect x="55" y="170" width="120" height="18" rx="2"/><line x1="65" y1="176" x2="75" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="80" y1="176" x2="100" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="105" y1="176" x2="125" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="130" y1="176" x2="145" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="75" y1="182" x2="155" y2="182" stroke-width="1.5" opacity="0.3"/><rect x="500" y="20" width="170" height="110" rx="5"/><rect x="510" y="28" width="150" height="90" rx="2" fill="url(#screenGrad2)"/><line x1="520" y1="45" x2="580" y2="45" stroke-width="2" opacity="0.5"/><line x1="520" y1="55" x2="600" y2="55" stroke-width="2" opacity="0.4"/><line x1="520" y1="65" x2="560" y2="65" stroke-width="2" opacity="0.3"/><line x1="520" y1="75" x2="610" y2="75" stroke-width="2" opacity="0.5"/><line x1="520" y1="85" x2="570" y2="85" stroke-width="2" opacity="0.3"/><line x1="520" y1="95" x2="595" y2="95" stroke-width="2" opacity="0.4"/><circle cx="585" cy="125" r="2" fill="#ff2d95" opacity="0.8"><animate attributeName="opacity" values="0.8;0.3;0.8" dur="2.3s" repeatCount="indefinite"/></circle><line x1="585" y1="130" x2="585" y2="155"/><path d="M550,155 L620,155 L625,162 L545,162 Z"/><rect x="525" y="170" width="120" height="18" rx="2"/><line x1="535" y1="176" x2="545" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="550" y1="176" x2="570" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="575" y1="176" x2="595" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="600" y1="176" x2="615" y2="176" stroke-width="1.5" opacity="0.4"/><line x1="545" y1="182" x2="625" y2="182" stroke-width="1.5" opacity="0.3"/><path d="M200,75 L240,75 L240,100" stroke-width="2.5"/><rect x="234" y="100" width="12" height="8" rx="1" stroke-width="2"/><path d="M246,104 L280,104 L280,140 Q280,150 290,150 L410,150 Q420,150 420,140 L420,104 L454,104" stroke-width="2.5"/><rect x="454" y="100" width="12" height="8" rx="1" stroke-width="2"/><path d="M460,100 L460,75 L500,75" stroke-width="2.5"/></g><circle r="4" fill="#0ff" opacity="0.8"><animateMotion dur="2s" repeatCount="indefinite" path="M246,104 L280,104 L280,140 Q280,150 290,150 L410,150 Q420,150 420,140 L420,104 L454,104"/><animate attributeName="opacity" values="0.9;0.5;0.9" dur="0.8s" repeatCount="indefinite"/></circle><circle r="3.5" fill="#ff2d95" opacity="0.7"><animateMotion dur="2s" repeatCount="indefinite" begin="1s" path="M454,104 L420,104 L420,140 Q420,150 410,150 L290,150 Q280,150 280,140 L280,104 L246,104"/><animate attributeName="opacity" values="0.8;0.4;0.8" dur="0.7s" repeatCount="indefinite"/></circle><circle r="3" fill="#b026ff" opacity="0.6"><animateMotion dur="2.5s" repeatCount="indefinite" begin="0.5s" path="M246,104 L280,104 L280,140 Q280,150 290,150 L410,150 Q420,150 420,140 L420,104 L454,104"/><animate attributeName="opacity" values="0.7;0.3;0.7" dur="0.6s" repeatCount="indefinite"/></circle><text x="350" y="168" text-anchor="middle" font-family="'Orbitron',sans-serif" font-size="11" font-weight="700" fill="url(#lanGrad)" opacity="0.6" letter-spacing="4">LAN</text></svg></div>
+
+      <div class="header-content">
+        <div class="logo-wrap">
+          <span class="logo-main">LAN GAMES MANAGER</span>
+          <span class="logo-sub">by Ryo</span>
+        </div>
+
+        <!-- Canvas pour le scrolltext style Amiga (demoscene.js) -->
+        <div class="demoscene-wrap"><canvas id="demosceneCanvas"></canvas></div>
+
+        <div class="header-stats">
+          <!-- Bouton lecture musique chiptune XM -->
+          <button class="music-btn" id="musicBtn" onclick="LGM.toggleMusic()" title="Chiptune XM Player">&#9835; PLAY XM</button>
+
+          <div class="stat-block">
+            <div class="stat-value" id="totalGames">0</div>
+            <div class="stat-label">Jeux</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-value" id="totalSize">0 Mo</div>
+            <div class="stat-label">Taille totale</div>
+            <div class="db-badge">SQLite WASM • Pas de cache</div>
+            <div class="db-size" id="dbSize"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ---- BARRE D'OUTILS ---- -->
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="LGM.openScanModal()">⬡ Scanner dossier</button>
+      <button class="btn" onclick="LGM.openAddModal()">＋ Ajouter un jeu</button>
+      <button class="btn" onclick="LGM.exportSQLite()">↓ Sauvegarder .sqlite</button>
+      <button class="btn btn-primary" onclick="document.getElementById('importInput').click()">↑ Charger .sqlite</button>
+      <button class="btn btn-success" onclick="LGM.loadRyoDB()">⬡ Charger database de Ryo</button>
+      <button class="btn" onclick="LGM.openStatsModal()" style="border-color:var(--neon-yellow);color:var(--neon-yellow)">📊 Statistiques</button>
+
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Rechercher un jeu..." oninput="LGM.debouncedRender()">
+      </div>
+
+      <button class="sort-btn" id="sortNameBtn" onclick="LGM.toggleSort('name')" title="Trier par nom">A-Z <span class="arrow">▲</span></button>
+      <button class="sort-btn" id="sortSizeBtn" onclick="LGM.toggleSort('size')" title="Trier par taille">Taille <span class="arrow">▲</span></button>
+
+      <div class="filter-tags" id="filterTags"></div>
+    </div>
+
+    <!-- ---- GRILLE DES JEUX (remplie par JS) ---- -->
+    <div class="game-grid" id="gameGrid"></div>
+
+    <!-- ---- MESSAGE "AUCUN JEU" ---- -->
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">⬡</div>
+      <div class="empty-title">Aucune base de données chargée</div>
+      <div class="empty-sub" style="margin-bottom:1.2rem">Importez un fichier .sqlite ou scannez un dossier pour commencer</div>
+      <button class="btn btn-primary" onclick="document.getElementById('importInput').click()" style="margin:0 auto;display:block">↑ Charger un fichier .sqlite</button>
+    </div>
+  </div>
+
+  <!-- =================================================================
+    MODALES (pop-ups)
+    Chacune est cachée par défaut (display:none)
+  ================================================================= -->
+
+  <!-- Modale : Ajouter / Modifier un jeu -->
+  <div class="modal-overlay" id="gameModal" style="display:none" onclick="if(event.target===this)LGM.closeModal('gameModal')">
+    <div class="modal"><button class="modal-close" onclick="LGM.closeModal('gameModal')">✕</button>
+      <h2 id="gameModalTitle">Ajouter un jeu</h2><input type="hidden" id="editId">
+      <div class="form-group"><label>Nom du jeu</label><input type="text" id="gameName" placeholder="Counter-Strike 2"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Type</label><select id="gameType"><option value="Action">Action</option><option value="Aventure">Aventure</option><option value="Course">Course</option><option value="FPS">FPS</option><option value="Jeu de plateau">Jeu de plateau</option><option value="MOBA">MOBA</option><option value="RPG">RPG</option><option value="RTS">RTS</option><option value="Sandbox">Sandbox</option><option value="Simulation">Simulation</option><option value="Sport">Sport</option><option value="Tower Defense">Tower Defense</option><option value="TPS">TPS</option><option value="Autre">Autre</option></select></div>
+        <div class="form-group"><label>Taille (Go)</label><input type="number" id="gameSize" placeholder="25.4" step="0.1" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Joueurs max</label><input type="number" id="gamePlayers" placeholder="16" min="1"></div>
+        <div class="form-group"><label>Version</label><input type="text" id="gameVersion" placeholder="1.0.0"></div>
+      </div>
+      <div class="form-group"><label>Chemin local</label><input type="text" id="gamePath" placeholder="D:\Games\MonJeu"></div>
+      <div class="form-actions"><button class="btn" onclick="LGM.closeModal('gameModal')">Annuler</button><button class="btn btn-primary" onclick="LGM.saveGame()">Sauvegarder</button></div>
+    </div>
+  </div>
+
+  <!-- Modale : Scanner un dossier -->
+  <div class="modal-overlay" id="scanModal" style="display:none" onclick="if(event.target===this)LGM.closeModal('scanModal')">
+    <div class="modal"><button class="modal-close" onclick="LGM.closeModal('scanModal')">✕</button>
+      <h2>Scanner un dossier</h2>
+      <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem">Le <strong style="color:#50ffff">genre est déduit du nom du sous-dossier</strong> parent.<br><span style="color:var(--text-dim);font-size:0.8rem">Structure attendue : <strong style="color:#c89fff">DossierRacine / Genre / NomDuJeu / fichiers</strong></span><br><span style="color:var(--text-dim);font-size:0.8rem">Exemple : Games / <strong style="color:#ff5faf">FPS</strong> / Counter-Strike 2 / cs2.exe</span></p>
+      <label class="btn btn-primary" style="display:inline-block;text-align:center;cursor:pointer">⬡ Choisir un dossier<input type="file" webkitdirectory directory multiple id="folderInput" style="display:none" onchange="LGM.handleFolderScan(event)"></label>
+      <div id="scanStatus" style="margin-top:0.8rem;font-size:0.85rem;color:var(--text-dim);display:none"></div>
+    </div>
+  </div>
+
+  <!-- Modale : Valider l'import -->
+  <div class="modal-overlay" id="validateModal" style="display:none" onclick="if(event.target===this)LGM.closeModal('validateModal')">
+    <div class="modal" style="max-width:660px"><button class="modal-close" onclick="LGM.closeModal('validateModal')">✕</button>
+      <h2>Valider l'import</h2>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:0.3rem">Cochez les jeux à importer et vérifiez le genre.</p>
+      <div style="margin-bottom:0.8rem"><button class="validate-toggle" onclick="LGM.toggleAllValidation(true)">✓ Tout sélectionner</button><span style="color:var(--text-dim);margin:0 0.3rem">|</span><button class="validate-toggle" onclick="LGM.toggleAllValidation(false)">✕ Tout décocher</button></div>
+      <div class="validate-list" id="validateList"></div>
+      <div class="validate-summary"><span><span class="validate-count" id="validateCount">0</span> jeu(x)</span><span id="validateTotalSize" style="font-family:var(--ff-mono);color:var(--neon-cyan)"></span></div>
+      <div class="form-actions"><button class="btn" onclick="LGM.closeModal('validateModal')">Annuler</button><button class="btn btn-success" onclick="LGM.confirmValidation()">✓ Confirmer</button></div>
+    </div>
+  </div>
+
+  <!-- Input caché pour l'import de fichiers .sqlite -->
+  <input type="file" id="importInput" accept=".sqlite,.db,.sqlite3" style="display:none" onchange="LGM.handleImportSQLite(event)">
+
+  <!-- Modale : Commentaire -->
+  <div class="modal-overlay" id="commentModal" style="display:none" onclick="if(event.target===this)LGM.closeModal('commentModal')">
+    <div class="modal" style="max-width:480px">
+      <button class="modal-close" onclick="LGM.closeModal('commentModal')">✕</button>
+      <h2>💬 Commentaire</h2>
+      <div id="commentGameName" style="font-family:var(--ff-display);font-size:1rem;color:var(--neon-cyan);margin-bottom:1rem;letter-spacing:1px"></div>
+      <input type="hidden" id="commentId">
+      <div class="form-group"><label>Commentaire</label><textarea id="commentText" rows="4" style="width:100%;padding:0.6rem 0.8rem;font-family:var(--ff-body);font-size:1rem;background:rgba(0,0,0,0.4);border:1px solid var(--panel-border);color:var(--text-primary);outline:none;resize:vertical;min-height:80px" placeholder="Notes, astuces, config serveur..."></textarea></div>
+      <div class="form-actions"><button class="btn" onclick="LGM.closeModal('commentModal')">Annuler</button><button class="btn btn-primary" onclick="LGM.saveComment()">Sauvegarder</button></div>
+    </div>
+  </div>
+
+  <!-- Modale : Statistiques -->
+  <div class="modal-overlay" id="statsModal" style="display:none" onclick="if(event.target===this)LGM.closeModal('statsModal')">
+    <div class="modal" style="max-width:750px">
+      <button class="modal-close" onclick="LGM.closeModal('statsModal')">✕</button>
+      <h2>📊 Statistiques</h2>
+      <div id="statsGlobal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.8rem;margin-bottom:1.5rem"></div>
+      <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+        <button class="btn btn-sm" id="chartPieBtn" onclick="LGM.setChartMode('pie')" style="border-color:var(--neon-yellow);color:var(--neon-yellow)">◉ Circulaire</button>
+        <button class="btn btn-sm" id="chartBarBtn" onclick="LGM.setChartMode('bar')">▥ Histogramme</button>
+        <select id="statsDataSelect" onchange="LGM.renderStatsChart()" style="padding:0.3rem 0.6rem;font-family:var(--ff-mono);font-size:0.8rem;background:rgba(0,0,0,0.4);border:1px solid var(--panel-border);color:var(--text-primary);cursor:pointer;outline:none"><option value="type">Par genre</option><option value="size">Taille par genre</option><option value="players">Par nb joueurs</option></select>
+      </div>
+      <canvas id="statsCanvas" width="680" height="350" style="width:100%;max-height:350px;background:rgba(0,0,0,0.3);border:1px solid var(--panel-border);border-radius:4px"></canvas>
+      <div id="statsLegend" style="display:flex;flex-wrap:wrap;gap:0.5rem 1rem;margin-top:0.8rem;font-size:0.8rem"></div>
+    </div>
+  </div>
+
+  <!-- =================================================================
+    SCRIPTS JAVASCRIPT — Chargés dans l'ordre :
+    1. utils.js    → Petites fonctions utilitaires + namespace LGM
+    2. db.js       → Moteur SQLite (chargement WASM, requêtes SQL)
+    3. ui.js       → Affichage (rendu des cartes, filtres, modales)
+    4. scanner.js  → Scan de dossier + détection auto de genre
+    5. stats.js    → Graphiques (camembert, histogramme)
+    6. demoscene.js→ Scrolltext animé style Amiga
+    7. xm-player.js→ Lecteur de musique chiptune au format .XM
+    8. app.js      → Point d'entrée : initialisation, orchestration
+  ================================================================= -->
+  <script src="utils.js"></script>
+  <script src="db.js"></script>
+  <script src="ui.js"></script>
+  <script src="scanner.js"></script>
+  <script src="stats.js"></script>
+  <script src="demoscene.js"></script>
+  <script src="xm-player.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
